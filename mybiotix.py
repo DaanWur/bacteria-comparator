@@ -53,9 +53,11 @@ class Parameters:
         Returns:
              None.
         """
+
         for line in f:
+
             if org_name in line and (
-                    "Production (export)" in line or "production (export)" in line
+                    "Production" in line or "production" in line
             ):
                 line_of_bac1 = line
                 export_material = line_of_bac1.split()[0]
@@ -64,6 +66,10 @@ class Parameters:
                 attributes_lis.append(
                     export_material
                 )
+        if org_name not in f.read():
+            print(org_name)
+            print("Organism not found")
+
 
     def venn_creator(self, first_lis: list, second_lis: list) -> None:
         """Creates a venn diagram that shows what substances each organism produce
@@ -86,6 +92,7 @@ class Parameters:
         # changing the labels
         v.get_label_by_id('100').set_text(str(len(first_lis)))
         v.get_label_by_id('010').set_text(str(len(second_lis)))
+        plt.title("Produced substances comparison")
         matplotlib.pyplot.savefig('Bacterias.png')
         plt.show()
 
