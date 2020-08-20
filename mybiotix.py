@@ -1,4 +1,6 @@
 import sys
+
+import matplotlib
 import pandas
 import matplotlib_venn as vplt
 from matplotlib import pyplot as plt
@@ -32,28 +34,40 @@ class Parameters:
 
         # list of second organism
         second_attr_lis = []
-        for line in f:
-            if self.first_org_name in line and (
-                    "Production" in line or "production" in line
-            ):
-                line_of_bac1 = line
-                export_material_1 = line_of_bac1.split()[0]
 
-                # takes the string at the first place
-                first_attr_lis.append(
-                    export_material_1
-                )  # appending the found export materials to a list
-            if self.second_org_name in line and (
-                    "Production" in line or "production" in line
-            ):
-                line_of_bac2 = line
-                export_material_2 = line_of_bac2.split()[0]
-                second_attr_lis.append(export_material_2)
+        self.get_export_materials(f, first_attr_lis, self.first_org_name)
+        f.seek(0)
+        self.get_export_materials(f, second_attr_lis, self.second_org_name)
         f.close()
         self.venn_creator(first_attr_lis, second_attr_lis)
 
+    def get_export_materials(self, f, attributes_lis: list, org_name):
+        """Finds the substances the wanted bacteria products.
+
+        Args:
+         f: file, the file where the bacteria info is held.
+         attributes_lis: list, holds the substances that each bacteria export.
+         org_name: str, the name of the organism.
+
+
+        Returns:
+             None.
+        """
+        for line in f:
+            if org_name in line and (
+                    "Production (export)" in line or "production (export)" in line
+            ):
+                line_of_bac1 = line
+                export_material = line_of_bac1.split()[0]
+
+                # takes the string at the first place
+                attributes_lis.append(
+                    export_material
+                )
+
     def venn_creator(self, first_lis: list, second_lis: list) -> None:
-        """Creates the venn diagram.
+        """Creates a venn diagram that shows what substances each organism produce
+            and which substances are mutual.
 
         Args:
             first_lis: list, all substances of the first germ.
@@ -62,12 +76,17 @@ class Parameters:
         Returns:
                 None.
         """
-
+        first_set = set(first_lis)
+        second_set = set(second_lis)
         v = vplt.venn2(
-            subsets=(set(first_lis), set(second_lis)),
+            subsets=(first_set, second_set),
             set_labels=(self.first_org_name, self.second_org_name),
             set_colors=("green", "blue"),
         )
+        # changing the labels
+        v.get_label_by_id('100').set_text(str(len(first_lis)))
+        v.get_label_by_id('010').set_text(str(len(second_lis)))
+        matplotlib.pyplot.savefig('Bacterias.png')
         plt.show()
 
     # loops through the excel file and finds the matching bacteria
@@ -82,10 +101,7 @@ class Parameters:
               org_name: str, name of the organism.
         """
         list_of_bacterias = pandas.read_excel(r"organisms.xlsx")
-        for key in list_of_bacterias.index:
-            if key == germ_id:
-                org_name = list_of_bacterias["Organism"][key]
-                return org_name
+        return list_of_bacterias["Organism"][germ_id]
 
     def main(self):
 
