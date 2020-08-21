@@ -116,7 +116,7 @@ class Parameters:
 
     # loops through the excel file and finds the matching bacteria
     def find_germs(self, germ_id: int) -> str:
-        """ Find the germs name from the excel file using the id.
+        """ Finds the germs name from the excel file using the id.
 
         Args:
          germ_id: int, id of the germ in the excel file.
