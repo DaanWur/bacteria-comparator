@@ -71,7 +71,8 @@ class Parameters:
         if appeared_counter == 0:
             self.Mbox(
                 "Organism not found",
-                org_name + " does not exist in NJS16.txt or does not produce , sorry for the inconvenience.",
+                org_name
+                + " does not exist in NJS16.txt or does not produce , sorry for the inconvenience.",
                 1,
             )
             sys.exit()
@@ -133,13 +134,11 @@ class Parameters:
         # first num from user
         first_str = sys.argv[1]
 
-        # conversion of str to int
         first_num = int(first_str, 10)
 
         # second num from user
         second_str = sys.argv[2]
 
-        # conversion of str to int
         second_num = int(second_str, 10)
         self.first_org_name = self.find_germs(first_num - 1)
         self.second_org_name = self.find_germs(second_num - 1)
