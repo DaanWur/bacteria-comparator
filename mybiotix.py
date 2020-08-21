@@ -1,3 +1,4 @@
+import ctypes
 import sys
 import matplotlib
 import pandas
@@ -33,15 +34,16 @@ class Parameters:
 
         # list of second organism
         second_attr_lis = []
-
         self.get_export_materials(f, first_attr_lis, self.first_org_name)
         f.seek(0)
         self.get_export_materials(f, second_attr_lis, self.second_org_name)
-        f.close()
         self.venn_creator(first_attr_lis, second_attr_lis)
+
+        f.close()
 
     def get_export_materials(self, f, attributes_lis: list, org_name):
         """Finds the substances the wanted bacteria products.
+        in case the organism doesn't exist or doesn't produce a message pops and shut down.
 
         Args:
          f: file, the file where the bacteria info is held.
@@ -52,19 +54,41 @@ class Parameters:
         Returns:
              None.
         """
+        appeared_counter = 0
 
         for line in f:
-
+            # finds the line where the name is within the line
             if org_name in line and ("Production" in line or "production" in line):
-                line_of_bac1 = line
-                export_material = line_of_bac1.split()[0]
 
-                # takes the string at the first place
-                attributes_lis.append(export_material)
-        f.seek(0)
-        if org_name not in f.read():
-            print(org_name)
-            print("Organism not found")
+                # split and check if the exact string exists
+                substances = line.split("\t")
+                if substances[2] == org_name:
+                    line_of_bac1 = line
+                    export_material = line_of_bac1.split()[0]
+                    appeared_counter += 1
+                    # takes the string at the first place
+                    attributes_lis.append(export_material)
+        if appeared_counter == 0:
+            self.Mbox(
+                "Organism not found",
+                org_name + " does not exist in NJS16.txt or does not produce , sorry for the inconvenience.",
+                1,
+            )
+            sys.exit()
+
+    def Mbox(self, title: str, text: str, style: int):
+        """Creates a message if the bacteria does not exits in the file.
+        Args:
+         title: str, title of the window.
+         text: str, text of the window.
+         style: int, number which sets the window style.
+
+
+        Returns:
+                Int.
+
+        """
+        return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
     def venn_creator(self, first_lis: list, second_lis: list) -> None:
         """Creates a venn diagram that shows what substances each organism produce
@@ -89,7 +113,6 @@ class Parameters:
         v.get_label_by_id("010").set_text(str(len(second_lis)))
         plt.title("Produced substances comparison")
         matplotlib.pyplot.savefig("Bacterias.png")
-        plt.show()
 
     # loops through the excel file and finds the matching bacteria
     def find_germs(self, germ_id: int) -> str:
